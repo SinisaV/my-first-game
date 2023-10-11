@@ -22,6 +22,7 @@ public class MyFirstGame extends ApplicationAdapter {
 	private Texture backpackImg;
 	private Texture dumbbellImg;
 	private Texture pizzaImg;
+	private Texture bulletImg;
 
 	private BitmapFont font;
 
@@ -29,27 +30,32 @@ public class MyFirstGame extends ApplicationAdapter {
 	private int health;
 	private Array<Rectangle> dumbbells;
 	private Array<Rectangle> pizzas;
+	private Array<Rectangle> bullets;
 
 	private float dumbbellSpawnTime;
 	private int dumbbellsCollected;
 
 	private float pizzaSpawnTime;
+	private int pizzasRemoved;
 
 	private static final float BACKPACK_SPEED = 250f;
 	private static final float DUMBBELL_SPEED = 300f;
 	private static final float  DUMBBELL_SPAWN_TIME = 0.5f;
-	private static final float PIZZA_SPEED = 150f;
+	private static float PIZZA_SPEED = 150f;
 	private static final float PIZZA_DAMAGE = 25f;
 	private static final float PIZZA_SPAWN_TIME = 2f;
+
+	private static final float BULLET_SPEED = 300f;
 	
 	@Override
 	public void create () {
 		batch = new SpriteBatch();
 
-		backgroundImg = new Texture("images/fitness_background2.jpg");
-		backpackImg = new Texture("images/small_backpack.png");
-		dumbbellImg = new Texture("images/small_dumbbell.png");
-		pizzaImg = new Texture("images/small_pizza.png");
+		backgroundImg = new Texture("images/fitness_background.jpg");
+		backpackImg = new Texture("images/backpack.png");
+		dumbbellImg = new Texture("images/dumbbell.png");
+		pizzaImg = new Texture("images/pizza.png");
+		bulletImg = new Texture("images/protein.png");
 		font = new BitmapFont(Gdx.files.internal("fonts/oswald-32.fnt"));
 
 		backpack = new Rectangle();
@@ -65,6 +71,9 @@ public class MyFirstGame extends ApplicationAdapter {
 		pizzas = new Array<>();
 		health = 100;
 		spawnPizza();
+
+		bullets = new Array<>();
+		pizzasRemoved = 0;
 	}
 
 	@Override
@@ -84,12 +93,36 @@ public class MyFirstGame extends ApplicationAdapter {
 	private void handleInput() {
 		if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) moveLeft(Gdx.graphics.getDeltaTime());
 		if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) moveRight(Gdx.graphics.getDeltaTime());
+
+		if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+			shootBullet();
+		}
 	}
 
 	private void update(float delta) {
 		float elapsedTime = (TimeUtils.nanosToMillis(TimeUtils.nanoTime()) / 1000f);
 		if (elapsedTime - dumbbellSpawnTime > DUMBBELL_SPAWN_TIME) spawnDumbbell();
 		if (elapsedTime - pizzaSpawnTime > PIZZA_SPAWN_TIME) spawnPizza();
+
+
+		// Update bullets
+		for (Rectangle bullet : bullets) {
+			bullet.y += BULLET_SPEED * delta;
+
+			for (Iterator<Rectangle> pizzaIt = pizzas.iterator(); pizzaIt.hasNext(); ) {
+				Rectangle pizza = pizzaIt.next();
+				if (bullet.overlaps(pizza)) {
+					pizzasRemoved++;
+					pizzaIt.remove();
+					bullets.removeValue(bullet, true);
+					break;
+				}
+			}
+
+			if (bullet.y > Gdx.graphics.getHeight()) {
+				bullets.removeValue(bullet, true);
+			}
+		}
 
 		for (Iterator<Rectangle> it = dumbbells.iterator(); it.hasNext(); ) {
 			Rectangle coin = it.next();
@@ -116,6 +149,10 @@ public class MyFirstGame extends ApplicationAdapter {
 				it.remove();
 			}
 		}
+
+		if (pizzasRemoved % 5 == 0 && pizzasRemoved != 0) {
+			PIZZA_SPEED += 4f;
+		}
 	}
 
 	private void draw() {
@@ -129,7 +166,7 @@ public class MyFirstGame extends ApplicationAdapter {
 			);
 			font.setColor(Color.NAVY);
 			font.draw(batch,
-					"YOUR IMPROVED FITNESS HEALTH: " + (dumbbellsCollected),
+					"YOUR FITNESS HEALTH: " + (dumbbellsCollected + pizzasRemoved/100) + " %",
 					20f, Gdx.graphics.getHeight() - 60f
 			);
 			return;
@@ -141,6 +178,10 @@ public class MyFirstGame extends ApplicationAdapter {
 
 		for (Rectangle pizza : pizzas) {
 			batch.draw(pizzaImg, pizza.x, pizza.y);
+		}
+
+		for (Rectangle bullet : bullets) {
+			batch.draw(bulletImg, bullet.x, bullet.y, bullet.width, bullet.height);
 		}
 
 		batch.draw(backpackImg, backpack.x, backpack.y-15);
@@ -155,6 +196,11 @@ public class MyFirstGame extends ApplicationAdapter {
 		font.draw(batch,
 				"SCORE: " + dumbbellsCollected,
 				20f, Gdx.graphics.getHeight() - 60f
+		);
+
+		font.draw(batch,
+				"ELIMINATED PIZZAS: " + pizzasRemoved,
+				20f, Gdx.graphics.getHeight() - 100f
 		);
 	}
 
@@ -188,6 +234,15 @@ public class MyFirstGame extends ApplicationAdapter {
 		pizza.height = pizzaImg.getHeight();
 		pizzas.add(pizza);
 		pizzaSpawnTime = TimeUtils.nanosToMillis(TimeUtils.nanoTime()) / 1000f;
+	}
+
+	private void shootBullet() {
+		Rectangle bullet = new Rectangle();
+		bullet.width = bulletImg.getWidth();
+		bullet.height = bulletImg.getHeight();
+		bullet.x = backpack.x + backpack.width / 2 - bullet.width / 2;
+		bullet.y = backpack.y + backpack.height;
+		bullets.add(bullet);
 	}
 	
 	@Override
