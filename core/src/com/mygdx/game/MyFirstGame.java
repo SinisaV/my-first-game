@@ -23,6 +23,8 @@ public class MyFirstGame extends ApplicationAdapter {
 	private Texture dumbbellImg;
 	private Texture pizzaImg;
 	private Texture bulletImg;
+	private Sound backpackVoice;
+	private Sound dumbbellCollect;
 
 	private BitmapFont font;
 
@@ -37,13 +39,14 @@ public class MyFirstGame extends ApplicationAdapter {
 
 	private float pizzaSpawnTime;
 	private int pizzasRemoved;
+	private boolean hasIncreasedSpeedThisCycle = false;
 
 	private static final float BACKPACK_SPEED = 250f;
 	private static final float DUMBBELL_SPEED = 300f;
 	private static final float  DUMBBELL_SPAWN_TIME = 0.5f;
 	private static float PIZZA_SPEED = 150f;
 	private static final float PIZZA_DAMAGE = 25f;
-	private static final float PIZZA_SPAWN_TIME = 2f;
+	private static final float PIZZA_SPAWN_TIME = 1.5f;
 
 	private static final float BULLET_SPEED = 300f;
 	
@@ -56,6 +59,9 @@ public class MyFirstGame extends ApplicationAdapter {
 		dumbbellImg = new Texture("images/dumbbell.png");
 		pizzaImg = new Texture("images/pizza.png");
 		bulletImg = new Texture("images/protein.png");
+		backpackVoice = Gdx.audio.newSound(Gdx.files.internal("sounds/open_bag_sound.mp3"));
+		dumbbellCollect = Gdx.audio.newSound(Gdx.files.internal("sounds/dropped_weights.wav"));
+
 		font = new BitmapFont(Gdx.files.internal("fonts/oswald-32.fnt"));
 
 		backpack = new Rectangle();
@@ -125,34 +131,41 @@ public class MyFirstGame extends ApplicationAdapter {
 		}
 
 		for (Iterator<Rectangle> it = dumbbells.iterator(); it.hasNext(); ) {
-			Rectangle coin = it.next();
-			coin.y -= DUMBBELL_SPEED * delta;
-			if (coin.y + dumbbellImg.getHeight() < 0) {
+			Rectangle dumbbell = it.next();
+			dumbbell.y -= DUMBBELL_SPEED * delta;
+			if (dumbbell.y + dumbbellImg.getHeight() < 0) {
 				it.remove();
 			}
-			if (coin.overlaps(backpack)) {
+			if (dumbbell.overlaps(backpack)) {
 				dumbbellsCollected++;
-				//coinCollect.play();
+				dumbbellCollect.play();
 				it.remove();
 			}
 		}
 
 		for (Iterator<Rectangle> it = pizzas.iterator(); it.hasNext(); ) {
-			Rectangle hammer = it.next();
-			hammer.y -= PIZZA_SPEED * delta;
-			if (hammer.y + pizzaImg.getHeight() < 0) {
+			Rectangle pizza = it.next();
+			pizza.y -= PIZZA_SPEED * delta;
+			if (pizza.y + pizzaImg.getHeight() < 0) {
 				it.remove();
 			}
-			if (hammer.overlaps(backpack)) {
+			if (pizza.overlaps(backpack)) {
 				health -= PIZZA_DAMAGE;
-				//piggyVoice.play();
+				backpackVoice.play();
 				it.remove();
 			}
 		}
 
-		if (pizzasRemoved % 5 == 0 && pizzasRemoved != 0) {
-			PIZZA_SPEED += 4f;
+
+		if (pizzasRemoved > 0 && pizzasRemoved % 5 == 0 && !hasIncreasedSpeedThisCycle) {
+			PIZZA_SPEED += 50f;
+			hasIncreasedSpeedThisCycle = true;
 		}
+
+		if (pizzasRemoved % 5 != 0) {
+			hasIncreasedSpeedThisCycle = false;
+		}
+
 	}
 
 	private void draw() {
