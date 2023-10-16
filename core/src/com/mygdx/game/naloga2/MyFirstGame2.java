@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.mygdx.game.naloga2;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -16,7 +16,7 @@ import com.badlogic.gdx.utils.TimeUtils;
 
 import java.util.Iterator;
 
-public class MyFirstGame extends ApplicationAdapter {
+public class MyFirstGame2 extends ApplicationAdapter {
 	SpriteBatch batch;
 	private Texture backgroundImg;
 	private Texture backpackImg;
