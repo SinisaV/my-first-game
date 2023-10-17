@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.mygdx.game.naloga1;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -265,5 +265,7 @@ public class MyFirstGame extends ApplicationAdapter {
 		backpackImg.dispose();
 		dumbbellImg.dispose();
 		pizzaImg.dispose();
+		backpackVoice.dispose();
+		dumbbellCollect.dispose();
 	}
 }
