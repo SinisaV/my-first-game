@@ -11,13 +11,15 @@ import java.awt.Rectangle;
 public class Backpack extends GameObject {
     private Sound backpackVoice;
     private Rectangle backpack;
+    private Bullet bullet;
 
     private int health = 100;
 
     private static final float BACKPACK_SPEED = 250f;
 
-    public Backpack (float x, float y) {
+    public Backpack (float x, float y, Bullet bullet) {
         super(x, y, 10, 10, Assets.backpackImg);
+        this.bullet = bullet;
     }
 
     public void create() {
@@ -32,7 +34,7 @@ public class Backpack extends GameObject {
 
         Assets.font.setColor(Color.RED);
         Assets.font.draw(batch,
-                "HEALTH: " + health,
+                "HEALTH: " + getHealth(),
                 20f, Gdx.graphics.getHeight() - 20f
         );
     }
@@ -40,6 +42,10 @@ public class Backpack extends GameObject {
     public void handleInput() {
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) moveLeft(Gdx.graphics.getDeltaTime());
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) moveRight(Gdx.graphics.getDeltaTime());
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
+            bullet.shootBullet(bounds);
+        }
     }
 
     private void moveLeft(float delta) {
@@ -62,5 +68,9 @@ public class Backpack extends GameObject {
 
     public int getHealth() {
         return health;
+    }
+
+    public void setHealth(int health) {
+        this.health = health;
     }
 }

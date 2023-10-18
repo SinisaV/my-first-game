@@ -19,15 +19,19 @@ import java.util.Iterator;
 public class MyFirstGame2 extends ApplicationAdapter {
 	private Backpack backpack;
 	private Dumbbell dumbbell;
+	private Pizza pizza;
+	private Bullet bullet;
 	SpriteBatch batch;
 	@Override
 	public void create() {
 		batch = new SpriteBatch();
 		Assets.load();
-		backpack = new Backpack(0, 0);
+		bullet = new Bullet(0,0);
+		backpack = new Backpack(0, 0, bullet);
 		backpack.create();
 
 		dumbbell = new Dumbbell(1000, 1000);
+		pizza = new Pizza(1000, 1000);
 	}
 
 	@Override
@@ -49,6 +53,8 @@ public class MyFirstGame2 extends ApplicationAdapter {
 		float elapsedTime = (TimeUtils.nanosToMillis(TimeUtils.nanoTime()) / 1000f);
 
 		dumbbell.update(elapsedTime, delta, backpack.bounds);
+		pizza.update(elapsedTime, delta, backpack.bounds, backpack);
+		bullet.update(elapsedTime, delta, pizza.getPizzas());
 	}
 
 	private void draw() {
@@ -65,6 +71,8 @@ public class MyFirstGame2 extends ApplicationAdapter {
 
 		backpack.draw(batch);
 		dumbbell.draw(batch);
+		pizza.draw(batch);
+		bullet.draw(batch);
 	}
 
 	@Override
