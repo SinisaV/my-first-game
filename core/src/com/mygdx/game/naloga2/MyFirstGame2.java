@@ -2,19 +2,10 @@ package com.mygdx.game.naloga2;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
-
-import java.util.Iterator;
 
 public class MyFirstGame2 extends ApplicationAdapter {
 	private Backpack backpack;
@@ -54,7 +45,7 @@ public class MyFirstGame2 extends ApplicationAdapter {
 
 		dumbbell.update(elapsedTime, delta, backpack.bounds);
 		pizza.update(elapsedTime, delta, backpack.bounds, backpack);
-		bullet.update(elapsedTime, delta, pizza.getPizzas());
+		bullet.update(delta, pizza.getPizzas(), pizza);
 	}
 
 	private void draw() {
@@ -65,6 +56,11 @@ public class MyFirstGame2 extends ApplicationAdapter {
 			Assets.font.draw(batch,
 					"GAME OVER",
 					20f, Gdx.graphics.getHeight() - 20f
+			);
+			Assets.font.setColor(Color.NAVY);
+			Assets.font.draw(batch,
+					"YOUR SCORE: " + dumbbell.getDumbbellsCollected(),
+					20f, Gdx.graphics.getHeight() - 60f
 			);
 			return;
 		}

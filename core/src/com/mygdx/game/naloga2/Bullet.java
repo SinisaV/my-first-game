@@ -1,18 +1,16 @@
 package com.mygdx.game.naloga2;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.TimeUtils;
 
 import java.util.Iterator;
 
 public class Bullet extends GameObject {
-    private Array<Rectangle> bullets;
+    private final Array<Rectangle> bullets;
     private int pizzasRemoved;
+    private boolean hasIncreasedSpeedThisCycle = false;
     private static final float BULLET_SPEED = 300f;
     public Bullet(float x, float y) {
         super(x, y, 10, 10, Assets.bulletImg);
@@ -20,7 +18,7 @@ public class Bullet extends GameObject {
         pizzasRemoved = 0;
     }
 
-    public void update(float elapsedTime, float delta, Array<Rectangle> pizzas) {
+    public void update(float delta, Array<Rectangle> pizzas, Pizza myPizza) {
         for (Rectangle bullet : bullets) {
             bullet.y += BULLET_SPEED * delta;
 
@@ -38,12 +36,27 @@ public class Bullet extends GameObject {
                 bullets.removeValue(bullet, true);
             }
         }
+
+        if (pizzasRemoved > 0 && pizzasRemoved % 5 == 0 && !hasIncreasedSpeedThisCycle) {
+            //PIZZA_SPEED += 50f;
+            myPizza.setPizzaSpeed(myPizza.getPizzaSpeed() + 50);
+            hasIncreasedSpeedThisCycle = true;
+        }
+
+        if (pizzasRemoved % 5 != 0) {
+            hasIncreasedSpeedThisCycle = false;
+        }
     }
 
     public void draw(SpriteBatch batch) {
         for (Rectangle bullet : bullets) {
             batch.draw(Assets.bulletImg, bullet.x, bullet.y, bullet.width, bullet.height);
         }
+
+        Assets.font.draw(batch,
+                "ELIMINATED PIZZAS: " + pizzasRemoved,
+                20f, Gdx.graphics.getHeight() - 100f
+        );
     }
 
     public void shootBullet(Rectangle backpack) {

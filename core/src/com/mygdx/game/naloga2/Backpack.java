@@ -2,16 +2,14 @@ package com.mygdx.game.naloga2;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import java.awt.Rectangle;
 
 public class Backpack extends GameObject {
-    private Sound backpackVoice;
     private Rectangle backpack;
-    private Bullet bullet;
+    private final Bullet bullet;
 
     private int health = 100;
 

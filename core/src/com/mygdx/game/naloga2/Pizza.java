@@ -1,7 +1,6 @@
 package com.mygdx.game.naloga2;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -11,9 +10,8 @@ import com.badlogic.gdx.utils.TimeUtils;
 import java.util.Iterator;
 
 public class Pizza extends  GameObject {
-    private Array<Rectangle> pizzas;
+    private final Array<Rectangle> pizzas;
     private float pizzaSpawnTime;
-    private int pizzasRemoved;
 
     private static float PIZZA_SPEED = 150f;
     private static final float PIZZA_DAMAGE = 25f;
@@ -68,5 +66,12 @@ public class Pizza extends  GameObject {
 
     public Array<Rectangle> getPizzas() {
         return pizzas;
+    }
+
+    public int getPizzaSpeed() {
+        return (int) PIZZA_SPEED;
+    }
+    public void setPizzaSpeed(int speed) {
+        PIZZA_SPEED = speed;
     }
 }

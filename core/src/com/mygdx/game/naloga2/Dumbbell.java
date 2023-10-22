@@ -1,7 +1,6 @@
 package com.mygdx.game.naloga2;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
@@ -12,7 +11,7 @@ import com.badlogic.gdx.utils.TimeUtils;
 import java.util.Iterator;
 
 public class Dumbbell extends GameObject {
-    private Array<Rectangle> dumbbells;
+    private final Array<Rectangle> dumbbells;
     private float dumbbellSpawnTime;
     private int dumbbellsCollected;
 
@@ -70,5 +69,9 @@ public class Dumbbell extends GameObject {
         dumbbells.add(dumbbell);
         System.out.println(dumbbells.size);
         dumbbellSpawnTime = TimeUtils.nanosToMillis(TimeUtils.nanoTime()) / 1000f;
+    }
+
+    public int getDumbbellsCollected() {
+        return dumbbellsCollected;
     }
 }
