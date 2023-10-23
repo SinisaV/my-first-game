@@ -4,32 +4,23 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-
-import java.awt.Rectangle;
+import com.badlogic.gdx.utils.Array;
 
 public class Backpack extends DynamicGameObject {
-    private Rectangle backpack;
-    private final Bullet bullet;
+    //private Rectangle backpack;
 
     private int health = 100;
 
-    private static final float BACKPACK_SPEED = 250f;
+    private static final float SPEED = 250f;
 
-    public Backpack (float x, float y, Bullet bullet) {
-        super(x, y, 10, 10, Assets.backpackImg);
-        this.bullet = bullet;
-    }
-
-    public void create() {
-        backpack = new Rectangle();
-        backpack.x = (int) (Gdx.graphics.getWidth() / 2f - Assets.backpackImg.getWidth() / 2f);
-        backpack.y = (int) 20f;
-        backpack.width = Assets.backpackImg.getWidth();
-        backpack.height = Assets.backpackImg.getHeight();
+    public Backpack (float x, float y) {
+        super(x, y, Assets.backpackImg.getWidth(), Assets.backpackImg.getHeight());
+        bounds.x = (int) (Gdx.graphics.getWidth() / 2f - Assets.backpackImg.getWidth() / 2f);
+        bounds.y = 20f;
     }
     @Override
     public void draw(SpriteBatch batch) {
-        batch.draw(Assets.backpackImg, backpack.x, backpack.y-15);
+        batch.draw(Assets.backpackImg, bounds.x, bounds.y-15);
 
         Assets.font.setColor(Color.RED);
         Assets.font.draw(batch,
@@ -38,31 +29,36 @@ public class Backpack extends DynamicGameObject {
         );
     }
 
-    public void handleInput() {
+    public void handleInput(Array<Bullet> bullets) {
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) moveLeft(Gdx.graphics.getDeltaTime());
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) moveRight(Gdx.graphics.getDeltaTime());
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-            bullet.shootBullet(bounds);
+            shootBullet(bullets);
         }
     }
 
     private void moveLeft(float delta) {
-        backpack.x -= BACKPACK_SPEED * delta;
-        if (backpack.x < 0)
-            backpack.x = 0;
+        bounds.x -= SPEED * delta;
+        if (bounds.x < 0)
+            bounds.x = 0;
         updateBounds();
     }
 
     private void moveRight(float delta) {
-        backpack.x += BACKPACK_SPEED * delta;
-        if (backpack.x > Gdx.graphics.getWidth() - Assets.backpackImg.getWidth())
-            backpack.x = Gdx.graphics.getWidth() - Assets.backpackImg.getWidth();
+        bounds.x += SPEED * delta;
+        if (bounds.x > Gdx.graphics.getWidth() - Assets.backpackImg.getWidth())
+            bounds.x = Gdx.graphics.getWidth() - Assets.backpackImg.getWidth();
         updateBounds();
     }
 
+    private void shootBullet(Array<Bullet> bullets) {
+        Bullet bullet = new Bullet(bounds.x + bounds.width / 2 - Assets.bulletImg.getWidth() / 2f, bounds.y + bounds.height);
+        bullets.add(bullet);
+    }
+
     private void updateBounds() {
-        bounds.set(backpack.x, backpack.y, backpack.width, backpack.height);
+        bounds.set(bounds.x, bounds.y, bounds.width, bounds.height);
     }
 
     public int getHealth() {
