@@ -10,7 +10,7 @@ import com.badlogic.gdx.utils.TimeUtils;
 
 import java.util.Iterator;
 
-public class Dumbbell extends GameObject {
+public class Dumbbell extends DynamicGameObject {
     private final Array<Rectangle> dumbbells;
     private float dumbbellSpawnTime;
     private int dumbbellsCollected;
@@ -48,6 +48,7 @@ public class Dumbbell extends GameObject {
         }
     }
 
+    @Override
     public void draw(SpriteBatch batch) {
         for (Rectangle dumbbell : dumbbells) {
             batch.draw(Assets.dumbbellImg, dumbbell.x, dumbbell.y);

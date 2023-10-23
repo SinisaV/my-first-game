@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 
 import java.awt.Rectangle;
 
-public class Backpack extends GameObject {
+public class Backpack extends DynamicGameObject {
     private Rectangle backpack;
     private final Bullet bullet;
 
@@ -27,6 +27,7 @@ public class Backpack extends GameObject {
         backpack.width = Assets.backpackImg.getWidth();
         backpack.height = Assets.backpackImg.getHeight();
     }
+    @Override
     public void draw(SpriteBatch batch) {
         batch.draw(Assets.backpackImg, backpack.x, backpack.y-15);
 

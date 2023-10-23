@@ -7,7 +7,7 @@ import com.badlogic.gdx.utils.Array;
 
 import java.util.Iterator;
 
-public class Bullet extends GameObject {
+public class Bullet extends DynamicGameObject {
     private final Array<Rectangle> bullets;
     private int pizzasRemoved;
     private boolean hasIncreasedSpeedThisCycle = false;
@@ -48,6 +48,7 @@ public class Bullet extends GameObject {
         }
     }
 
+    @Override
     public void draw(SpriteBatch batch) {
         for (Rectangle bullet : bullets) {
             batch.draw(Assets.bulletImg, bullet.x, bullet.y, bullet.width, bullet.height);

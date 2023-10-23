@@ -9,7 +9,7 @@ import com.badlogic.gdx.utils.TimeUtils;
 
 import java.util.Iterator;
 
-public class Pizza extends  GameObject {
+public class Pizza extends DynamicGameObject {
     private final Array<Rectangle> pizzas;
     private float pizzaSpawnTime;
 
@@ -48,6 +48,7 @@ public class Pizza extends  GameObject {
         }
     }
 
+    @Override
     public void draw(SpriteBatch batch) {
         for (Rectangle pizza : pizzas) {
             batch.draw(Assets.pizzaImg, pizza.x, pizza.y);
