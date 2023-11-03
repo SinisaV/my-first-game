@@ -11,7 +11,7 @@ public class Backpack extends DynamicGameObject {
 
     private int health = 100;
 
-    private static final float SPEED = 250f;
+    private static float SPEED = 250f;
 
     public Backpack (float x, float y) {
         super(x, y, Assets.backpackImg.getWidth(), Assets.backpackImg.getHeight());
@@ -68,4 +68,13 @@ public class Backpack extends DynamicGameObject {
     public void setHealth(int health) {
         this.health = health;
     }
+
+    public float getSpeed() {
+    	return SPEED;
+    }
+
+    public void setSpeed(float speed) {
+    	SPEED = speed;
+    }
+
 }

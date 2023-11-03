@@ -11,6 +11,7 @@ public class Assets {
     public static  Texture dumbbellImg;
     public static  Texture pizzaImg;
     public static  Texture bulletImg;
+    public static Texture powerImg;
     public static  Sound backpackVoice;
     public static  Sound dumbbellCollect;
 
@@ -22,6 +23,7 @@ public class Assets {
         dumbbellImg = new Texture("images/dumbbell.png");
         pizzaImg = new Texture("images/pizza.png");
         bulletImg = new Texture("images/protein.png");
+        powerImg = new Texture("images/power.png");
         backpackVoice = Gdx.audio.newSound(Gdx.files.internal("sounds/open_bag_sound.mp3"));
         dumbbellCollect = Gdx.audio.newSound(Gdx.files.internal("sounds/dropped_weights.wav"));
 
