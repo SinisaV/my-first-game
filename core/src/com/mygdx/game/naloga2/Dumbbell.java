@@ -4,9 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.TimeUtils;
 
-public class Dumbbell extends DynamicGameObject {
+public class Dumbbell extends DynamicGameObject implements Pool.Poolable {
     //private final Array<Rectangle> dumbbells;
     private static float spawnTime;
     private static int dumbbellsCollected = 0;
@@ -17,6 +18,7 @@ public class Dumbbell extends DynamicGameObject {
     public Dumbbell (float x, float y) {
         super(x, y, Assets.dumbbellImg.getWidth(), Assets.dumbbellImg.getHeight());
         //dumbbells = new Array<>();
+        Gdx.app.log("Dumbbell", "Created: X=" + x + ", Y=" + y);
     }
 
     public void update(float delta) {
@@ -24,17 +26,27 @@ public class Dumbbell extends DynamicGameObject {
     }
 
     @Override
+    public void reset() {
+        bounds.y = 0;
+        bounds.x = 0;
+        Gdx.app.log("Dumbbell", "Reset: X=" + bounds.x + ", Y=" + bounds.y);
+    }
+
+    @Override
     public void draw(SpriteBatch batch) {
         batch.draw(Assets.dumbbellImg, bounds.x, bounds.y);
     }
 
-    public static void spawnDumbbell(Array<Dumbbell> dumbbells) {
+    public static void spawnDumbbell(Pool<Dumbbell> dumbbellPool, Array<Dumbbell> dumbbells) {
+        Dumbbell dumbbell = dumbbellPool.obtain();
         float randomX = MathUtils.random(0f, Gdx.graphics.getWidth() - Assets.dumbbellImg.getWidth());
         float randomY = Gdx.graphics.getHeight();
-        Dumbbell dumbbell = new Dumbbell(randomX, randomY);
+        // Dumbbell dumbbell = new Dumbbell(randomX, randomY);
+        dumbbell.bounds.setPosition(randomX, randomY);
         dumbbells.add(dumbbell);
         //System.out.println("Dumbbell spawned at: X=" + randomX + ", Y=" + randomY);
         spawnTime = TimeUtils.nanosToMillis(TimeUtils.nanoTime()) / 1000f;
+        Gdx.app.log("Dumbbell", "Obtained from pool: X=" + randomX + ", Y=" + randomY);
     }
 
     public static int getDumbbellsCollected() {
@@ -51,5 +63,9 @@ public class Dumbbell extends DynamicGameObject {
 
     public static void setDumbbellsCollected(int dumbbellsCollected) {
         Dumbbell.dumbbellsCollected = dumbbellsCollected;
+    }
+
+    public static int getDumbbellsInPool(Pool<Dumbbell> pool) {
+        return pool.getFree();
     }
 }

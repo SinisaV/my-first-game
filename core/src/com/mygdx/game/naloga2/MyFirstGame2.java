@@ -7,6 +7,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 
@@ -18,6 +19,11 @@ public class MyFirstGame2 extends ApplicationAdapter {
 	private Array<Pizza> pizzas;
 	private Array<Bullet> bullets;
 	private Array<Power> powers;
+
+	private Pool<Dumbbell> dumbbellPool;
+	private Pool<Pizza> pizzaPool;
+	private Pool<Bullet> bulletPool;
+	private Pool<Power> powerPool;
 
 	private boolean hasIncreasedSpeedThisCycle = false;
 	private boolean isPaused = false;
@@ -37,6 +43,34 @@ public class MyFirstGame2 extends ApplicationAdapter {
 		dumbbells = new Array<>();
 		pizzas = new Array<>();
 		powers = new Array<>();
+
+		bulletPool = new Pool<Bullet>() {
+			@Override
+			protected Bullet newObject() {
+				return new Bullet(0, 0);
+			}
+		};
+		dumbbellPool = new Pool<Dumbbell>() {
+			@Override
+			protected Dumbbell newObject() {
+				return new Dumbbell(0, 0);
+			}
+		};
+
+		pizzaPool = new Pool<Pizza>() {
+			@Override
+			protected Pizza newObject() {
+				return new Pizza(0, 0);
+			}
+		};
+
+		powerPool = new Pool<Power>() {
+			@Override
+			protected Power newObject() {
+				return new Power(0, 0);
+			}
+		};
+
 		originalSpeed = backpack.getSpeed();
 	}
 
@@ -50,7 +84,7 @@ public class MyFirstGame2 extends ApplicationAdapter {
 
 
 		if (!isPaused && backpack.getHealth() > 0) {
-			backpack.handleInput(bullets);
+			backpack.handleInput(bulletPool, bullets);
 			update(Gdx.graphics.getDeltaTime());
 		} else if (backpack.getHealth() <= 0) {
 			if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
@@ -65,9 +99,9 @@ public class MyFirstGame2 extends ApplicationAdapter {
 
 	private void update(float delta) {
 		float elapsedTime = (TimeUtils.nanosToMillis(TimeUtils.nanoTime()) / 1000f);
-		if (elapsedTime - Dumbbell.getDumbbellSpawnTime() > Dumbbell.getDumbbellSpawnInterval()) Dumbbell.spawnDumbbell(dumbbells);
-		if (elapsedTime - Pizza.getPizzaSpawnTime() > Pizza.getPizzaSpawnInterval()) Pizza.spawnPizza(pizzas);
-		if (elapsedTime - Power.getPowerSpawnTime() > Power.getPowerSpawnInterval()) Power.spawnPower(powers);
+		if (elapsedTime - Dumbbell.getDumbbellSpawnTime() > Dumbbell.getDumbbellSpawnInterval()) Dumbbell.spawnDumbbell(dumbbellPool, dumbbells);
+		if (elapsedTime - Pizza.getPizzaSpawnTime() > Pizza.getPizzaSpawnInterval()) Pizza.spawnPizza(pizzaPool, pizzas);
+		if (elapsedTime - Power.getPowerSpawnTime() > Power.getPowerSpawnInterval()) Power.spawnPower(powerPool, powers);
 
 		for (Bullet bullet : bullets) {
 			for (Iterator<Pizza> pizzaIt = pizzas.iterator(); pizzaIt.hasNext(); ) {
@@ -77,12 +111,16 @@ public class MyFirstGame2 extends ApplicationAdapter {
 					Bullet.setPizzasRemoved(Bullet.getPizzasRemoved() + 1);
 					pizzaIt.remove();
 					bullets.removeValue(bullet, true);
+					bullet.reset();
+					bulletPool.free(bullet);
 					break;
 				}
 			}
 
 			if (bullet.bounds.y > Gdx.graphics.getHeight()) {
 				bullets.removeValue(bullet, true);
+				bullet.reset();
+				bulletPool.free(bullet);
 			}
 		}
 
@@ -91,12 +129,16 @@ public class MyFirstGame2 extends ApplicationAdapter {
 			dumbbell.update(delta);
 
 			if (dumbbell.bounds.y + Assets.dumbbellImg.getHeight() < 0) {
+				dumbbell.reset();
+				dumbbellPool.free(dumbbell);
 				it.remove();
 			}
 			if (dumbbell.bounds.overlaps(backpack.bounds)) {
 				Dumbbell.setDumbbellsCollected(Dumbbell.getDumbbellsCollected() + 1);
 				Assets.backpackVoice.play();
 				it.remove();
+				dumbbell.reset();
+				dumbbellPool.free(dumbbell);
 			}
 		}
 
@@ -105,11 +147,15 @@ public class MyFirstGame2 extends ApplicationAdapter {
 			pizza.update(delta);
 			if (pizza.bounds.y + Assets.pizzaImg.getHeight() < 0) {
 				it.remove();
+				pizza.reset();
+				pizzaPool.free(pizza);
 			}
 			if (pizza.bounds.overlaps(backpack.bounds)) {
 				backpack.setHealth((int) (backpack.getHealth() - Pizza.getDAMAGE()));
 				Assets.backpackVoice.play();
 				it.remove();
+				pizza.reset();
+				pizzaPool.free(pizza);
 			}
 		}
 
@@ -118,11 +164,15 @@ public class MyFirstGame2 extends ApplicationAdapter {
 			power.update(delta);
 			if (power.bounds.y + Assets.powerImg.getHeight() < 0) {
 				it.remove();
+				power.reset();
+				powerPool.free(power);
 			}
 			if (power.bounds.overlaps(backpack.bounds)) {
 				powerUp();
 				isPoweredUp = true;
 				it.remove();
+				power.reset();
+				powerPool.free(power);
 			}
 		}
 

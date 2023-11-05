@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 
 public class Backpack extends DynamicGameObject {
     //private Rectangle backpack;
@@ -29,12 +30,12 @@ public class Backpack extends DynamicGameObject {
         );
     }
 
-    public void handleInput(Array<Bullet> bullets) {
+    public void handleInput(Pool<Bullet> bulletPool, Array<Bullet> bullets) {
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) moveLeft(Gdx.graphics.getDeltaTime());
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) moveRight(Gdx.graphics.getDeltaTime());
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
-            shootBullet(bullets);
+            shootBullet(bulletPool, bullets);
         }
     }
 
@@ -52,8 +53,10 @@ public class Backpack extends DynamicGameObject {
         updateBounds();
     }
 
-    private void shootBullet(Array<Bullet> bullets) {
-        Bullet bullet = new Bullet(bounds.x + bounds.width / 2 - Assets.bulletImg.getWidth() / 2f, bounds.y + bounds.height);
+    private void shootBullet(Pool<Bullet> bulletPool, Array<Bullet> bullets) {
+        Bullet bullet = bulletPool.obtain();
+        // Bullet bullet = new Bullet(bounds.x + bounds.width / 2 - Assets.bulletImg.getWidth() / 2f, bounds.y + bounds.height);
+        bullet.bounds.setPosition(bounds.x + bounds.width / 2 - Assets.bulletImg.getWidth() / 2f, bounds.y + bounds.height);
         bullets.add(bullet);
     }
 
