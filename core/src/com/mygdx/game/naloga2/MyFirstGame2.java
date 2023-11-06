@@ -263,6 +263,22 @@ public class MyFirstGame2 extends ApplicationAdapter {
 		Dumbbell.setDumbbellsCollected(0);
 		Bullet.setPizzasRemoved(0);
 
+		for (Dumbbell dumbbell : dumbbells) {
+			dumbbellPool.free(dumbbell);
+		}
+
+		for (Pizza pizza : pizzas) {
+			pizzaPool.free(pizza);
+		}
+
+		for (Bullet bullet : bullets) {
+			bulletPool.free(bullet);
+		}
+
+		for (Power power : powers) {
+			powerPool.free(power);
+		}
+
 		dumbbells.clear();
 		pizzas.clear();
 		bullets.clear();
