@@ -5,11 +5,19 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
+import com.mygdx.game.naloga2.util.ViewportUtils;
+import com.mygdx.game.naloga2.util.debug.DebugCameraController;
+import com.mygdx.game.naloga2.util.debug.MemoryInfo;
 
 import java.util.Iterator;
 
@@ -32,10 +40,31 @@ public class MyFirstGame2 extends ApplicationAdapter {
 	private float remainingPowerUpTime = 3f;
 	private float originalSpeed;
 	SpriteBatch batch;
+
+	private OrthographicCamera camera;
+	private DebugCameraController debugCameraController;
+	private MemoryInfo memoryInfo;
+	private boolean debug = false;
+
+	private ShapeRenderer shapeRenderer;
+	public Viewport viewport;
+
 	@Override
 	public void create() {
 		batch = new SpriteBatch();
 		Assets.load();
+
+		// Initialize camera here
+		camera = new OrthographicCamera();
+		camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+
+		// debug
+		debugCameraController = new DebugCameraController();
+		debugCameraController.setStartPosition(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2f);
+		memoryInfo = new MemoryInfo(500);
+
+		shapeRenderer = new ShapeRenderer();
+		viewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
 
 		bullets = new Array<>();
 		backpack = new Backpack(0, 0);
@@ -82,6 +111,14 @@ public class MyFirstGame2 extends ApplicationAdapter {
 			isPaused = !isPaused;
 		}
 
+		if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) debug = !debug;
+		if (debug) {
+			debugCameraController.handleDebugInput(Gdx.graphics.getDeltaTime());
+			memoryInfo.update();
+		}
+
+		camera.update();
+		batch.setProjectionMatrix(camera.combined);
 
 		if (!isPaused && backpack.getHealth() > 0) {
 			backpack.handleInput(bulletPool, bullets);
@@ -95,6 +132,49 @@ public class MyFirstGame2 extends ApplicationAdapter {
 		draw();
 		pause();
 		batch.end();
+
+		if (debug) {
+			renderDebug();
+		}
+	}
+
+	private void renderDebug() {
+		debugCameraController.applyTo(camera);
+		batch.begin();
+		{
+			GlyphLayout layout = new GlyphLayout(Assets.font, "FPS:" + Gdx.graphics.getFramesPerSecond());
+			Assets.font.setColor(Color.YELLOW);
+			Assets.font.draw(batch, layout, Gdx.graphics.getWidth() - layout.width, Gdx.graphics.getHeight() - 50);
+
+			Assets.font.setColor(Color.YELLOW);
+			Assets.font.draw(batch, "RC:" + batch.totalRenderCalls, Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() - 20);
+
+			memoryInfo.render(batch, Assets.font);
+		}
+		batch.end();
+
+		batch.totalRenderCalls = 0;
+		ViewportUtils.drawGrid(viewport, shapeRenderer, 50);
+
+		shapeRenderer.setProjectionMatrix(camera.combined);
+		shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+		{
+			shapeRenderer.setColor(1, 1, 0, 1);
+			for (Dumbbell dumbbell : dumbbells) {
+				shapeRenderer.rect(dumbbell.bounds.x, dumbbell.bounds.y, Assets.dumbbellImg.getWidth(), Assets.dumbbellImg.getHeight());
+			}
+			for (Pizza pizza : pizzas) {
+				shapeRenderer.rect(pizza.bounds.x, pizza.bounds.y, Assets.pizzaImg.getWidth(), Assets.pizzaImg.getHeight());
+			}
+			for (Bullet bullet : bullets) {
+				shapeRenderer.rect(bullet.bounds.x, bullet.bounds.y, Assets.bulletImg.getWidth(), Assets.bulletImg.getHeight());
+			}
+			for (Power power : powers) {
+				shapeRenderer.rect(power.bounds.x, power.bounds.y, Assets.powerImg.getWidth(), Assets.powerImg.getHeight());
+			}
+			shapeRenderer.rect(backpack.bounds.x, backpack.bounds.y, Assets.backpackImg.getWidth(), Assets.backpackImg.getHeight());
+		}
+		shapeRenderer.end();
 	}
 
 	private void update(float delta) {

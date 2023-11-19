@@ -21,7 +21,7 @@ public class Backpack extends DynamicGameObject {
     }
     @Override
     public void draw(SpriteBatch batch) {
-        batch.draw(Assets.backpackImg, bounds.x, bounds.y-15);
+        batch.draw(Assets.backpackImg, bounds.x, bounds.y);
 
         Assets.font.setColor(Color.RED);
         Assets.font.draw(batch,
