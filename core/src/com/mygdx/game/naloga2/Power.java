@@ -12,6 +12,8 @@ public class Power extends DynamicGameObject implements Pool.Poolable {
     private static final float SPEED = 200f;
     private static final float SPAWN_TIME = 7.0f;
     private static boolean initialSpawn = false;
+    public float powerUpEffectX;
+    public float powerUpEffectY;
 
     public Power(float x, float y) {
         super(x, y, Assets.powerImg.getWidth(), Assets.powerImg.getHeight());
@@ -55,4 +57,8 @@ public class Power extends DynamicGameObject implements Pool.Poolable {
         return SPAWN_TIME;
     }
 
+    public void updatePowerUpEffectPosition(float x, float y) {
+        powerUpEffectX = x;
+        powerUpEffectY = y;
+    }
 }

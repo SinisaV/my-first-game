@@ -53,6 +53,8 @@ public class MyFirstGame2 extends ApplicationAdapter {
 	public void create() {
 		batch = new SpriteBatch();
 		Assets.load();
+		Assets.powerUpEffect.start();
+
 
 		// Initialize camera here
 		camera = new OrthographicCamera();
@@ -232,6 +234,8 @@ public class MyFirstGame2 extends ApplicationAdapter {
 			}
 			if (pizza.bounds.overlaps(backpack.bounds)) {
 				backpack.setHealth((int) (backpack.getHealth() - Pizza.getDAMAGE()));
+				Assets.bloodEffect.start();
+				backpack.updateBackpackEffectPosition(backpack.bounds.x, backpack.bounds.y);
 				Assets.backpackVoice.play();
 				it.remove();
 				pizza.reset();
@@ -242,6 +246,9 @@ public class MyFirstGame2 extends ApplicationAdapter {
 		for (Iterator<Power> it = powers.iterator(); it.hasNext(); ) {
 			Power power = it.next();
 			power.update(delta);
+
+			power.updatePowerUpEffectPosition(power.bounds.x, power.bounds.y);
+
 			if (power.bounds.y + Assets.powerImg.getHeight() < 0) {
 				it.remove();
 				power.reset();
@@ -305,6 +312,8 @@ public class MyFirstGame2 extends ApplicationAdapter {
 		);
 
 		backpack.draw(batch);
+		Assets.bloodEffect.setPosition(backpack.backpackEffectX+40, backpack.backpackEffectY+10);
+		Assets.bloodEffect.draw(batch, Gdx.graphics.getDeltaTime());
 
 		for (Dumbbell dumbbell: dumbbells) {
 			dumbbell.draw(batch);
@@ -320,6 +329,13 @@ public class MyFirstGame2 extends ApplicationAdapter {
 
 		for (Power power: powers) {
 			power.draw(batch);
+
+			if (Assets.powerUpEffect.isComplete()) {
+				Assets.powerUpEffect.reset();
+			}
+
+			Assets.powerUpEffect.setPosition(power.powerUpEffectX+25, power.powerUpEffectY+60);
+			Assets.powerUpEffect.draw(batch, Gdx.graphics.getDeltaTime());
 		}
 
 		if (isPoweredUp) {

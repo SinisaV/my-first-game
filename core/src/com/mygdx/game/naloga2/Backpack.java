@@ -14,6 +14,9 @@ public class Backpack extends DynamicGameObject {
 
     private static float SPEED = 250f;
 
+    public float backpackEffectX;
+    public float backpackEffectY;
+
     public Backpack (float x, float y) {
         super(x, y, Assets.backpackImg.getWidth(), Assets.backpackImg.getHeight());
         bounds.x = (int) (Gdx.graphics.getWidth() / 2f - Assets.backpackImg.getWidth() / 2f);
@@ -80,4 +83,8 @@ public class Backpack extends DynamicGameObject {
     	SPEED = speed;
     }
 
+    public void updateBackpackEffectPosition(float x, float y) {
+        backpackEffectX = x;
+        backpackEffectY = y;
+    }
 }

@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 
 public class Assets {
     public static Texture backgroundImg;
@@ -14,6 +15,9 @@ public class Assets {
     public static Texture powerImg;
     public static  Sound backpackVoice;
     public static  Sound dumbbellCollect;
+
+    public static ParticleEffect powerUpEffect;
+    public static ParticleEffect bloodEffect;
 
     public static  BitmapFont font;
 
@@ -26,6 +30,12 @@ public class Assets {
         powerImg = new Texture("images/power.png");
         backpackVoice = Gdx.audio.newSound(Gdx.files.internal("sounds/open_bag_sound.mp3"));
         dumbbellCollect = Gdx.audio.newSound(Gdx.files.internal("sounds/dropped_weights.wav"));
+
+        powerUpEffect = new ParticleEffect();
+        powerUpEffect.load(Gdx.files.internal("particles/powerup/powerup.pe"), Gdx.files.internal("particles/powerup"));
+
+        bloodEffect = new ParticleEffect();
+        bloodEffect.load(Gdx.files.internal("particles/blood/blood.pe"), Gdx.files.internal("particles/blood"));
 
         font = new BitmapFont(Gdx.files.internal("fonts/oswald-32.fnt"));
     }
