@@ -53,7 +53,6 @@ public class MyFirstGame2 extends ApplicationAdapter {
 	public void create() {
 		batch = new SpriteBatch();
 		Assets.load();
-		Assets.powerUpEffect.start();
 
 
 		// Initialize camera here
@@ -246,7 +245,6 @@ public class MyFirstGame2 extends ApplicationAdapter {
 		for (Iterator<Power> it = powers.iterator(); it.hasNext(); ) {
 			Power power = it.next();
 			power.update(delta);
-
 			power.updatePowerUpEffectPosition(power.bounds.x, power.bounds.y);
 
 			if (power.bounds.y + Assets.powerImg.getHeight() < 0) {
@@ -330,8 +328,10 @@ public class MyFirstGame2 extends ApplicationAdapter {
 		for (Power power: powers) {
 			power.draw(batch);
 
-			if (Assets.powerUpEffect.isComplete()) {
-				Assets.powerUpEffect.reset();
+			if (!isPaused) {
+				if (Assets.powerUpEffect.isComplete()) {
+					Assets.powerUpEffect.reset();
+				}
 			}
 
 			Assets.powerUpEffect.setPosition(power.powerUpEffectX+25, power.powerUpEffectY+60);
