@@ -2,11 +2,11 @@ muzzle flash
 - Delay -
 active: false
 - Duration - 
-lowMin: 100.0
-lowMax: 100.0
+lowMin: 200.0
+lowMax: 200.0
 - Count - 
 min: 0
-max: 300
+max: 150
 - Emission - 
 lowMin: 0.0
 lowMax: 0.0
@@ -60,8 +60,8 @@ timeline0: 0.0
 - X Scale - 
 lowMin: 0.0
 lowMax: 0.0
-highMin: 142.0
-highMax: 142.0
+highMin: 80.0
+highMax: 80.0
 relative: false
 scalingCount: 2
 scaling0: 0.0
@@ -73,16 +73,16 @@ timeline1: 1.0
 active: true
 lowMin: 0.0
 lowMax: 0.0
-highMin: 41.0
-highMax: 41.0
+highMin: 35.0
+highMax: 35.0
 relative: false
 scalingCount: 3
 scaling0: 0.0
-scaling1: 1.0
+scaling1: 0.98039216
 scaling2: 0.0
 timelineCount: 3
 timeline0: 0.0
-timeline1: 0.47945204
+timeline1: 0.4041096
 timeline2: 1.0
 - Velocity - 
 active: true
@@ -115,7 +115,7 @@ active: false
 - Tint - 
 colorsCount: 3
 colors0: 1.0
-colors1: 0.7058824
+colors1: 0.7019608
 colors2: 0.24313726
 timelineCount: 1
 timeline0: 0.0

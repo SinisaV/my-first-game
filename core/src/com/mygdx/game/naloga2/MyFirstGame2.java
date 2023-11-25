@@ -4,10 +4,15 @@ package com.mygdx.game.naloga2;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -15,6 +20,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.mygdx.game.naloga2.assets.AssetDescriptors;
 import com.mygdx.game.naloga2.util.ViewportUtils;
 import com.mygdx.game.naloga2.util.debug.DebugCameraController;
 import com.mygdx.game.naloga2.util.debug.MemoryInfo;
@@ -22,6 +28,18 @@ import com.mygdx.game.naloga2.util.debug.MemoryInfo;
 import java.util.Iterator;
 
 public class MyFirstGame2 extends ApplicationAdapter {
+	private BitmapFont font;
+	private TextureAtlas.AtlasRegion backgroundRegion;
+	private TextureAtlas.AtlasRegion backpackRegion;
+	private TextureAtlas.AtlasRegion dumbbellRegion;
+	private TextureAtlas.AtlasRegion pizzaRegion;
+	private TextureAtlas.AtlasRegion bulletRegion;
+	private TextureAtlas.AtlasRegion powerRegion;
+
+	private Sound backPackVoice;
+	private Sound dumbbellCollectVoice;
+	private ParticleEffect powerUpEffect;
+	private ParticleEffect bloodEffect;
 	private Backpack backpack;
 	private Array<Dumbbell> dumbbells;
 	private Array<Pizza> pizzas;
@@ -52,8 +70,29 @@ public class MyFirstGame2 extends ApplicationAdapter {
 	@Override
 	public void create() {
 		batch = new SpriteBatch();
-		Assets.load();
+		//Assets.load();
 
+		AssetManager assetManager = new AssetManager();
+		assetManager.load(AssetDescriptors.FONT);
+		assetManager.load(AssetDescriptors.GAMEPLAY);
+		assetManager.load(AssetDescriptors.BACKPACK_VOICE);
+		assetManager.load(AssetDescriptors.DUMBBELL_COLLECT);
+		assetManager.load(AssetDescriptors.POWER_UP);
+		assetManager.load(AssetDescriptors.BLOOD);
+		assetManager.finishLoading();
+
+		font = assetManager.get(AssetDescriptors.FONT); // Retrieve the font
+		TextureAtlas gameplayAtlas = assetManager.get(AssetDescriptors.GAMEPLAY); // Retrieve the atlas
+		backgroundRegion = gameplayAtlas.findRegion("fitness_background");
+		backpackRegion = gameplayAtlas.findRegion("backpack");
+		dumbbellRegion = gameplayAtlas.findRegion("dumbbell");
+		pizzaRegion = gameplayAtlas.findRegion("pizza");
+		bulletRegion = gameplayAtlas.findRegion("protein");
+		powerRegion = gameplayAtlas.findRegion("power");
+		backPackVoice = assetManager.get(AssetDescriptors.BACKPACK_VOICE);
+		dumbbellCollectVoice = assetManager.get(AssetDescriptors.DUMBBELL_COLLECT);
+		powerUpEffect = assetManager.get(AssetDescriptors.POWER_UP);
+		bloodEffect = assetManager.get(AssetDescriptors.BLOOD);
 
 		// Initialize camera here
 		camera = new OrthographicCamera();
@@ -68,7 +107,7 @@ public class MyFirstGame2 extends ApplicationAdapter {
 		viewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
 
 		bullets = new Array<>();
-		backpack = new Backpack(0, 0);
+		backpack = new Backpack(0, 0, backpackRegion);
 
 		dumbbells = new Array<>();
 		pizzas = new Array<>();
@@ -77,27 +116,27 @@ public class MyFirstGame2 extends ApplicationAdapter {
 		bulletPool = new Pool<Bullet>() {
 			@Override
 			protected Bullet newObject() {
-				return new Bullet(0, 0);
+				return new Bullet(0, 0, bulletRegion);
 			}
 		};
 		dumbbellPool = new Pool<Dumbbell>() {
 			@Override
 			protected Dumbbell newObject() {
-				return new Dumbbell(0, 0);
+				return new Dumbbell(0, 0, dumbbellRegion);
 			}
 		};
 
 		pizzaPool = new Pool<Pizza>() {
 			@Override
 			protected Pizza newObject() {
-				return new Pizza(0, 0);
+				return new Pizza(0, 0, pizzaRegion);
 			}
 		};
 
 		powerPool = new Pool<Power>() {
 			@Override
 			protected Power newObject() {
-				return new Power(0, 0);
+				return new Power(0, 0, powerRegion);
 			}
 		};
 
@@ -122,7 +161,7 @@ public class MyFirstGame2 extends ApplicationAdapter {
 		batch.setProjectionMatrix(camera.combined);
 
 		if (!isPaused && backpack.getHealth() > 0) {
-			backpack.handleInput(bulletPool, bullets);
+			backpack.handleInput(bulletPool, bullets, bulletRegion);
 			update(Gdx.graphics.getDeltaTime());
 		} else if (backpack.getHealth() <= 0) {
 			if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
@@ -143,14 +182,14 @@ public class MyFirstGame2 extends ApplicationAdapter {
 		debugCameraController.applyTo(camera);
 		batch.begin();
 		{
-			GlyphLayout layout = new GlyphLayout(Assets.font, "FPS:" + Gdx.graphics.getFramesPerSecond());
-			Assets.font.setColor(Color.YELLOW);
-			Assets.font.draw(batch, layout, Gdx.graphics.getWidth() - layout.width, Gdx.graphics.getHeight() - 50);
+			GlyphLayout layout = new GlyphLayout(font, "FPS:" + Gdx.graphics.getFramesPerSecond());
+			font.setColor(Color.YELLOW);
+			font.draw(batch, layout, Gdx.graphics.getWidth() - layout.width, Gdx.graphics.getHeight() - 50);
 
-			Assets.font.setColor(Color.YELLOW);
-			Assets.font.draw(batch, "RC:" + batch.totalRenderCalls, Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() - 20);
+			font.setColor(Color.YELLOW);
+			font.draw(batch, "RC:" + batch.totalRenderCalls, Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() - 20);
 
-			memoryInfo.render(batch, Assets.font);
+			memoryInfo.render(batch, font);
 		}
 		batch.end();
 
@@ -162,27 +201,27 @@ public class MyFirstGame2 extends ApplicationAdapter {
 		{
 			shapeRenderer.setColor(1, 1, 0, 1);
 			for (Dumbbell dumbbell : dumbbells) {
-				shapeRenderer.rect(dumbbell.bounds.x, dumbbell.bounds.y, Assets.dumbbellImg.getWidth(), Assets.dumbbellImg.getHeight());
+				shapeRenderer.rect(dumbbell.bounds.x, dumbbell.bounds.y, dumbbellRegion.getRegionWidth(), dumbbellRegion.getRegionHeight());
 			}
 			for (Pizza pizza : pizzas) {
-				shapeRenderer.rect(pizza.bounds.x, pizza.bounds.y, Assets.pizzaImg.getWidth(), Assets.pizzaImg.getHeight());
+				shapeRenderer.rect(pizza.bounds.x, pizza.bounds.y, pizzaRegion.getRegionWidth(), pizzaRegion.getRegionHeight());
 			}
 			for (Bullet bullet : bullets) {
-				shapeRenderer.rect(bullet.bounds.x, bullet.bounds.y, Assets.bulletImg.getWidth(), Assets.bulletImg.getHeight());
+				shapeRenderer.rect(bullet.bounds.x, bullet.bounds.y, bulletRegion.getRegionWidth(), bulletRegion.getRegionHeight());
 			}
 			for (Power power : powers) {
-				shapeRenderer.rect(power.bounds.x, power.bounds.y, Assets.powerImg.getWidth(), Assets.powerImg.getHeight());
+				shapeRenderer.rect(power.bounds.x, power.bounds.y, powerRegion.getRegionWidth(), powerRegion.getRegionHeight());
 			}
-			shapeRenderer.rect(backpack.bounds.x, backpack.bounds.y, Assets.backpackImg.getWidth(), Assets.backpackImg.getHeight());
+			shapeRenderer.rect(backpack.bounds.x, backpack.bounds.y, backpackRegion.getRegionWidth(), backpackRegion.getRegionHeight());
 		}
 		shapeRenderer.end();
 	}
 
 	private void update(float delta) {
 		float elapsedTime = (TimeUtils.nanosToMillis(TimeUtils.nanoTime()) / 1000f);
-		if (elapsedTime - Dumbbell.getDumbbellSpawnTime() > Dumbbell.getDumbbellSpawnInterval()) Dumbbell.spawnDumbbell(dumbbellPool, dumbbells);
-		if (elapsedTime - Pizza.getPizzaSpawnTime() > Pizza.getPizzaSpawnInterval()) Pizza.spawnPizza(pizzaPool, pizzas);
-		if (elapsedTime - Power.getPowerSpawnTime() > Power.getPowerSpawnInterval()) Power.spawnPower(powerPool, powers);
+		if (elapsedTime - Dumbbell.getDumbbellSpawnTime() > Dumbbell.getDumbbellSpawnInterval()) Dumbbell.spawnDumbbell(dumbbellPool, dumbbells, dumbbellRegion);
+		if (elapsedTime - Pizza.getPizzaSpawnTime() > Pizza.getPizzaSpawnInterval()) Pizza.spawnPizza(pizzaPool, pizzas, pizzaRegion);
+		if (elapsedTime - Power.getPowerSpawnTime() > Power.getPowerSpawnInterval()) Power.spawnPower(powerPool, powers, powerRegion);
 
 		for (Bullet bullet : bullets) {
 			for (Iterator<Pizza> pizzaIt = pizzas.iterator(); pizzaIt.hasNext(); ) {
@@ -209,14 +248,14 @@ public class MyFirstGame2 extends ApplicationAdapter {
 			Dumbbell dumbbell = it.next();
 			dumbbell.update(delta);
 
-			if (dumbbell.bounds.y + Assets.dumbbellImg.getHeight() < 0) {
+			if (dumbbell.bounds.y + dumbbellRegion.getRegionHeight() < 0) {
 				dumbbell.reset();
 				dumbbellPool.free(dumbbell);
 				it.remove();
 			}
 			if (dumbbell.bounds.overlaps(backpack.bounds)) {
 				Dumbbell.setDumbbellsCollected(Dumbbell.getDumbbellsCollected() + 1);
-				Assets.backpackVoice.play();
+				dumbbellCollectVoice.play();
 				it.remove();
 				dumbbell.reset();
 				dumbbellPool.free(dumbbell);
@@ -226,16 +265,16 @@ public class MyFirstGame2 extends ApplicationAdapter {
 		for (Iterator<Pizza> it = pizzas.iterator(); it.hasNext(); ) {
 			Pizza pizza = it.next();
 			pizza.update(delta);
-			if (pizza.bounds.y + Assets.pizzaImg.getHeight() < 0) {
+			if (pizza.bounds.y + pizzaRegion.getRegionHeight() < 0) {
 				it.remove();
 				pizza.reset();
 				pizzaPool.free(pizza);
 			}
 			if (pizza.bounds.overlaps(backpack.bounds)) {
 				backpack.setHealth((int) (backpack.getHealth() - Pizza.getDAMAGE()));
-				Assets.bloodEffect.start();
+				bloodEffect.start();
 				backpack.updateBackpackEffectPosition(backpack.bounds.x, backpack.bounds.y);
-				Assets.backpackVoice.play();
+				backPackVoice.play();
 				it.remove();
 				pizza.reset();
 				pizzaPool.free(pizza);
@@ -247,7 +286,7 @@ public class MyFirstGame2 extends ApplicationAdapter {
 			power.update(delta);
 			power.updatePowerUpEffectPosition(power.bounds.x, power.bounds.y);
 
-			if (power.bounds.y + Assets.powerImg.getHeight() < 0) {
+			if (power.bounds.y + powerRegion.getRegionHeight() < 0) {
 				it.remove();
 				power.reset();
 				powerPool.free(power);
@@ -280,38 +319,39 @@ public class MyFirstGame2 extends ApplicationAdapter {
 		}
 	}
 
+	@SuppressWarnings("SuspiciousIndentation")
 	private void draw() {
-		batch.draw(Assets.backgroundImg, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		batch.draw(backgroundRegion, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
 		if (backpack.getHealth() <= 0) {
-			Assets.font.setColor(Color.RED);
-			Assets.font.draw(batch,
+			font.setColor(Color.RED);
+			font.draw(batch,
 					"GAME OVER",
 					20f, Gdx.graphics.getHeight() - 20f
 			);
-			Assets.font.setColor(Color.NAVY);
-			Assets.font.draw(batch,
+			font.setColor(Color.NAVY);
+			font.draw(batch,
 					"YOUR SCORE: " + Dumbbell.getDumbbellsCollected(),
 					20f, Gdx.graphics.getHeight() - 60f
 			);
 			return;
 		}
 
-		Assets.font.setColor(Color.NAVY);
-        Assets.font.draw(batch,
+		font.setColor(Color.NAVY);
+        font.draw(batch,
                 "SCORE: " + Dumbbell.getDumbbellsCollected(),
                 20f, Gdx.graphics.getHeight() - 60f
         );
 
-		Assets.font.setColor(Color.RED);
-		Assets.font.draw(batch,
+		font.setColor(Color.RED);
+		font.draw(batch,
 				"ELIMINATED PIZZAS: " + Bullet.getPizzasRemoved(),
 				20f, Gdx.graphics.getHeight() - 100f
 		);
 
-		backpack.draw(batch);
-		Assets.bloodEffect.setPosition(backpack.backpackEffectX+40, backpack.backpackEffectY+10);
-		Assets.bloodEffect.draw(batch, Gdx.graphics.getDeltaTime());
+		backpack.draw(batch, font);
+		bloodEffect.setPosition(backpack.backpackEffectX+40, backpack.backpackEffectY+10);
+		bloodEffect.draw(batch, Gdx.graphics.getDeltaTime());
 
 		for (Dumbbell dumbbell: dumbbells) {
 			dumbbell.draw(batch);
@@ -329,26 +369,26 @@ public class MyFirstGame2 extends ApplicationAdapter {
 			power.draw(batch);
 
 			if (!isPaused) {
-				if (Assets.powerUpEffect.isComplete()) {
-					Assets.powerUpEffect.reset();
+				if (powerUpEffect.isComplete()) {
+					powerUpEffect.reset();
 				}
 			}
 
-			Assets.powerUpEffect.setPosition(power.powerUpEffectX+25, power.powerUpEffectY+60);
-			Assets.powerUpEffect.draw(batch, Gdx.graphics.getDeltaTime());
+			powerUpEffect.setPosition(power.powerUpEffectX+25, power.powerUpEffectY+60);
+			powerUpEffect.draw(batch, Gdx.graphics.getDeltaTime());
 		}
 
 		if (isPoweredUp) {
-			String timerText = "Power-up: " + String.format("%.1f", remainingPowerUpTime) + "s";
-			Assets.font.setColor(Color.GREEN);
-			Assets.font.draw(batch, timerText, Gdx.graphics.getWidth() / 2f - 50f, Gdx.graphics.getHeight() - 20f);
+			@SuppressWarnings("DefaultLocale") String timerText = "Power-up: " + String.format("%.1f", remainingPowerUpTime) + "s";
+			font.setColor(Color.GREEN);
+			font.draw(batch, timerText, Gdx.graphics.getWidth() / 2f - 50f, Gdx.graphics.getHeight() - 20f);
 		}
 	}
 
 	public void pause() {
 		if (isPaused) {
-			Assets.font.setColor(Color.WHITE);
-			Assets.font.draw(batch, "PAUSED", Gdx.graphics.getWidth() / 2f - 50f, Gdx.graphics.getHeight() / 2f);
+			font.setColor(Color.WHITE);
+			font.draw(batch, "PAUSED", Gdx.graphics.getWidth() / 2f - 50f, Gdx.graphics.getHeight() / 2f);
 		}
 	}
 
@@ -392,6 +432,7 @@ public class MyFirstGame2 extends ApplicationAdapter {
 	@Override
 	public void dispose() {
 		batch.dispose();
-		Assets.dispose();
+		//Assets.dispose();
+		shapeRenderer.dispose();
 	}
 }

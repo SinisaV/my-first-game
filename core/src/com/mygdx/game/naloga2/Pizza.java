@@ -2,6 +2,7 @@ package com.mygdx.game.naloga2;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -9,14 +10,15 @@ import com.badlogic.gdx.utils.TimeUtils;
 
 
 public class Pizza extends DynamicGameObject implements Pool.Poolable {
+    private final TextureRegion pizzaRegion;
     private static float spawnTime;
-
     private static float SPEED = 150f;
     private static final float DAMAGE = 25f;
     private static final float SPAWN_TIME = 1.5f;
 
-    public Pizza(float x, float y) {
-        super(x, y, Assets.pizzaImg.getWidth(), Assets.pizzaImg.getHeight());
+    public Pizza(float x, float y, TextureRegion pizzaRegion) {
+        super(x, y, pizzaRegion.getRegionWidth(), pizzaRegion.getRegionHeight());
+        this.pizzaRegion = pizzaRegion;
     }
 
     public void update(float delta) {
@@ -25,17 +27,16 @@ public class Pizza extends DynamicGameObject implements Pool.Poolable {
 
     @Override
     public void reset() {
-        bounds.set(0, 0, Assets.pizzaImg.getWidth(), Assets.pizzaImg.getHeight());
+        bounds.set(0, 0, pizzaRegion.getRegionWidth(), pizzaRegion.getRegionHeight());
     }
 
-    @Override
     public void draw(SpriteBatch batch) {
-        batch.draw(Assets.pizzaImg, bounds.x, bounds.y);
+        batch.draw(pizzaRegion, bounds.x, bounds.y);
     }
 
-    public static void spawnPizza(Pool<Pizza> pizzaPool, Array<Pizza> pizzas) {
+    public static void spawnPizza(Pool<Pizza> pizzaPool, Array<Pizza> pizzas, TextureRegion pizzaRegion) {
         Pizza pizza = pizzaPool.obtain();
-        float randomX = MathUtils.random(0f, Gdx.graphics.getWidth() - Assets.pizzaImg.getWidth());
+        float randomX = MathUtils.random(0f, Gdx.graphics.getWidth() - pizzaRegion.getRegionWidth());
         float randomY = Gdx.graphics.getHeight();
         //Pizza pizza = new Pizza(randomX, randomY);
         pizza.bounds.setPosition(randomX, randomY);

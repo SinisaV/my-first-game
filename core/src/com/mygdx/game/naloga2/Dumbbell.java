@@ -2,6 +2,7 @@ package com.mygdx.game.naloga2;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -9,14 +10,16 @@ import com.badlogic.gdx.utils.TimeUtils;
 
 public class Dumbbell extends DynamicGameObject implements Pool.Poolable {
     //private final Array<Rectangle> dumbbells;
+    private final TextureRegion dumbbellRegion;
     private static float spawnTime;
     private static int dumbbellsCollected = 0;
 
     private static final float SPEED = 300f;
     private static final float  SPAWN_TIME = 1.0f;
 
-    public Dumbbell (float x, float y) {
-        super(x, y, Assets.dumbbellImg.getWidth(), Assets.dumbbellImg.getHeight());
+    public Dumbbell (float x, float y, TextureRegion dumbbellRegion) {
+        super(x, y, dumbbellRegion.getRegionWidth(), dumbbellRegion.getRegionHeight());
+        this.dumbbellRegion = dumbbellRegion;
         //dumbbells = new Array<>();
         Gdx.app.log("Dumbbell", "Created: X=" + x + ", Y=" + y);
     }
@@ -32,14 +35,13 @@ public class Dumbbell extends DynamicGameObject implements Pool.Poolable {
         Gdx.app.log("Dumbbell", "Reset: X=" + bounds.x + ", Y=" + bounds.y);
     }
 
-    @Override
     public void draw(SpriteBatch batch) {
-        batch.draw(Assets.dumbbellImg, bounds.x, bounds.y);
+        batch.draw(dumbbellRegion, bounds.x, bounds.y);
     }
 
-    public static void spawnDumbbell(Pool<Dumbbell> dumbbellPool, Array<Dumbbell> dumbbells) {
+    public static void spawnDumbbell(Pool<Dumbbell> dumbbellPool, Array<Dumbbell> dumbbells, TextureRegion dumbbellRegion) {
         Dumbbell dumbbell = dumbbellPool.obtain();
-        float randomX = MathUtils.random(0f, Gdx.graphics.getWidth() - Assets.dumbbellImg.getWidth());
+        float randomX = MathUtils.random(0f, Gdx.graphics.getWidth() - dumbbellRegion.getRegionWidth());
         float randomY = Gdx.graphics.getHeight();
         // Dumbbell dumbbell = new Dumbbell(randomX, randomY);
         dumbbell.bounds.setPosition(randomX, randomY);

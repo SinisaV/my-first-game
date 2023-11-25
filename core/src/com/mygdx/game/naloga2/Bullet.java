@@ -1,13 +1,16 @@
 package com.mygdx.game.naloga2;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Pool;
 
 public class Bullet extends DynamicGameObject implements Pool.Poolable {
+    private final TextureRegion bulletRegion;
     private static int pizzasRemoved = 0;
     private static final float SPEED = 300f;
-    public Bullet(float x, float y) {
-        super(x, y, Assets.bulletImg.getWidth(), Assets.bulletImg.getHeight());
+    public Bullet(float x, float y, TextureRegion bulletRegion) {
+        super(x, y, bulletRegion.getRegionWidth(), bulletRegion.getRegionHeight());
+        this.bulletRegion = bulletRegion;
     }
 
     public void update(float delta) {
@@ -16,12 +19,11 @@ public class Bullet extends DynamicGameObject implements Pool.Poolable {
 
     @Override
     public void reset() {
-        bounds.set(0, 0, Assets.bulletImg.getWidth(), Assets.bulletImg.getHeight());
+        bounds.set(0, 0, bulletRegion.getRegionWidth(), bulletRegion.getRegionHeight());
     }
 
-    @Override
     public void draw(SpriteBatch batch) {
-        batch.draw(Assets.bulletImg, bounds.x, bounds.y, bounds.width, bounds.height);
+        batch.draw(bulletRegion, bounds.x, bounds.y, bounds.width, bounds.height);
     }
 
     public static int getPizzasRemoved() {
