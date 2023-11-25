@@ -433,6 +433,11 @@ public class MyFirstGame2 extends ApplicationAdapter {
 	public void dispose() {
 		batch.dispose();
 		//Assets.dispose();
+		font.dispose();
+		backPackVoice.dispose();
+		dumbbellCollectVoice.dispose();
+		powerUpEffect.dispose();
+		bloodEffect.dispose();
 		shapeRenderer.dispose();
 	}
 }
